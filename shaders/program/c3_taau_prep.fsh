@@ -33,8 +33,21 @@ uniform float far;
 uniform vec2 view_res;
 uniform vec2 taa_offset;
 
+#if defined WORLD_OVERWORLD && !defined BLOCKY_CLOUDS
+uniform sampler2D colortex11;
+uniform sampler2D colortex12;
+uniform float eyeAltitude;
+uniform float frameTime;
+uniform bool daylight_cycle_enabled;
+#endif
+
 #define TEMPORAL_REPROJECTION
 #include "/include/utility/space_conversion.glsl"
+
+#if defined WORLD_OVERWORLD && !defined BLOCKY_CLOUDS
+#include "/include/sky/clouds/history.glsl"
+#include "/include/sky/clouds/reprojection.glsl"
+#endif
 
 void main() {
     ivec2 texel = ivec2(gl_FragCoord.xy);
@@ -63,6 +76,24 @@ void main() {
     // Sky pixels follow camera rotation without translation.
     vec2 previous_uv = reproject_scene_space(scene_pos, depth >= 1.0, is_lod).xy;
     vec2 velocity = previous_uv - current_uv;
+
+#if defined WORLD_OVERWORLD && !defined BLOCKY_CLOUDS
+    if (!is_lod && depth >= 1.0) {
+        vec2 history_coord = clouds_history_texcoord(uv);
+        float distance_to_cloud = clouds_history_distance(history_coord);
+
+        if (distance_to_cloud > 0.0 && distance_to_cloud < 1e6 / CLOUDS_SCALE) {
+            float cloud_weight = clamp01(
+                1.0 - clouds_history_color(history_coord).a
+            );
+            vec2 cloud_uv = history_coord / taau_render_scale;
+            vec2 cloud_velocity
+                = reproject_clouds(cloud_uv, distance_to_cloud).xy - cloud_uv;
+            velocity = mix(velocity, cloud_velocity, cloud_weight);
+        }
+    }
+#endif
+
     motion_vectors = any(isnan(velocity)) || any(isinf(velocity))
         ? vec2(0.0)
         : clamp(velocity, vec2(-1.0), vec2(1.0));

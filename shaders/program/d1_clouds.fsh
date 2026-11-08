@@ -161,8 +161,12 @@ void main() {
     ivec2 checkerboard_pos = CLOUDS_TEMPORAL_UPSCALING * texel
         + clouds_checkerboard_offsets[frameCounter % checkerboard_area];
 
-    vec2 new_uv = vec2(checkerboard_pos) / vec2(view_res)
-        * rcp(float(taau_render_scale));
+    vec2 sample_pos = vec2(checkerboard_pos);
+#ifdef PHOTON_SR_ACTIVE
+    // Match the pixel centres used by the unjittered cloud history.
+    sample_pos += 0.5;
+#endif
+    vec2 new_uv = sample_pos / view_res * rcp(taau_render_scale);
 
     // Get maximum depth from area covered by this fragment
     float depth_max = depth_max_4x4(depthtex1, taau_render_scale);

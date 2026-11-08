@@ -1,21 +1,19 @@
 #if !defined INCLUDE_SKY_CLOUDS_SAMPLING
 #define INCLUDE_SKY_CLOUDS_SAMPLING
 
+#if defined WORLD_OVERWORLD
+#include "/include/sky/clouds/history.glsl"
+#endif
+
 // Sample filtered clouds
 vec4 read_clouds_and_aurora(vec2 uv, out float apparent_distance) {
 #if defined WORLD_OVERWORLD
-    // Soften clouds for new pixels
-    float pixel_age
-        = texelFetch(colortex12, ivec2(uv * view_res * taau_render_scale), 0).y;
-    float ld = 2.0 * dampen(max0(1.0 - 0.1 * pixel_age));
-
-    apparent_distance
-        = min_of(textureGather(colortex12, uv * taau_render_scale, 0));
-    vec4 result = textureLod(colortex11, uv * taau_render_scale, ld);
+    vec2 history_coord = clouds_history_texcoord(uv);
+    apparent_distance = clouds_history_distance(history_coord);
+    vec4 result = clouds_history_color(history_coord);
 
     if (LIGHTNING_FLASH_UNIFORM > 0.01) {
-        float ambient_scattering
-            = texture(colortex12, uv * taau_render_scale).z;
+        float ambient_scattering = texture(colortex12, history_coord).z;
         result.xyz += LIGHTNING_FLASH_UNIFORM * lightning_flash_intensity
             * ambient_scattering;
     }
