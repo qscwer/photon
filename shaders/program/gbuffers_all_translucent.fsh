@@ -363,7 +363,7 @@ void main() {
 
     // Clip to TAAU viewport
 
-#if defined TAA && defined TAAU
+#if defined PHOTON_SR_ACTIVE || (defined TAA && defined TAAU)
     if (clamp01(coord) != coord) {
         discard;
     }

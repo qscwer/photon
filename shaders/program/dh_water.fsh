@@ -169,7 +169,7 @@ void main() {
 
     vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
 
-#if defined TAA && defined TAAU
+#if defined PHOTON_SR_ACTIVE || (defined TAA && defined TAAU)
     if (clamp01(coord) != coord) {
         discard;
     }

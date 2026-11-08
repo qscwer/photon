@@ -245,8 +245,8 @@ void main() {
     return;
 #endif
 
-#if defined TAAU
-    // Fixes issue at the top and left side of the screen with TAAU
+#if defined TAAU || defined PHOTON_SR_ACTIVE
+    // Keep cloud history taps inside the scaled render area.
     vec2 uv_clamped = clamp(uv, 0.0, 0.95);
 #else
 #define uv_clamped uv
@@ -278,7 +278,7 @@ void main() {
     // Reproject clouds
     vec2 previous_uv = reproject_clouds(uv, closest_distance).xy;
 
-#ifdef TAAU
+#if defined TAAU || defined PHOTON_SR_ACTIVE
     vec2 previous_uv_clamped = clamp(
         previous_uv,
         vec2(0.0),
@@ -376,7 +376,7 @@ void main() {
     float pixel_age = max0(history_data.y) * float(!disocclusion);
     float history_weight = 1.0 - rcp(max(pixel_age - checkerboard_area, 1.0));
 
-#ifndef TAAU
+#if !defined TAAU && !defined PHOTON_SR_ACTIVE
     // Offcenter rejection
     vec2 pixel_center_offset
         = 1.0 - abs(fract(previous_uv * view_res) * 2.0 - 1.0);

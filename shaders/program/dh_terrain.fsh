@@ -58,7 +58,7 @@ mat3 get_tbn_matrix(vec3 normal) {
 void main() {
     // Clip to TAAU viewport
 
-#if defined TAA && defined TAAU
+#if defined PHOTON_SR_ACTIVE || (defined TAA && defined TAAU)
     vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
     if (clamp01(coord) != coord) {
         discard;

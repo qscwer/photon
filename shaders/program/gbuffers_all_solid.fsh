@@ -240,7 +240,7 @@ vec3 draw_end_portal() {
 const float lod_bias = log2(taau_render_scale);
 
 void main() {
-#if defined TAA && defined TAAU
+#if defined PHOTON_SR_ACTIVE || (defined TAA && defined TAAU)
     vec2 coord = gl_FragCoord.xy * view_pixel_size * rcp(taau_render_scale);
     if (clamp01(coord) != coord) {
         discard;
