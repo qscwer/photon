@@ -1,3 +1,7 @@
+#if defined SR_ENABLE && SR_ENABLE && SR_SHOULD_APPLY_SCALE
+#define PHOTON_SR_ACTIVE
+#endif
+
 {
     "unusedString":
         "
@@ -21,9 +25,9 @@
         -1 : "off",
         0 : "ONE ONE_MINUS_SRC_ALPHA ONE ONE_MINUS_SRC_ALPHA"
     },
-#ifdef TAA
+#if defined PHOTON_SR_ACTIVE || defined TAA
     "taaOffset": "{ 
-        #ifdef TAAU
+        #if defined PHOTON_SR_ACTIVE || defined TAAU
             return taa_offset;
         #else 
             return taa_offset * 0.66; 
@@ -31,7 +35,9 @@
     }",
     "useViewportDims": true,
 #endif
-#ifdef TAAU 
+#ifdef PHOTON_SR_ACTIVE
+    "renderScale": [SR_RENDER_SCALE_FACTOR, SR_RENDER_SCALE_FACTOR],
+#elif defined TAAU
     "renderScale": [TAAU_RENDER_SCALE, TAAU_RENDER_SCALE],
 #endif
     "uniforms": [

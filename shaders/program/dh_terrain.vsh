@@ -96,7 +96,7 @@ void main() {
 
     vec4 clip_pos = dhProjection * vec4(pos, 1.0);
 
-#if defined TAA && defined TAAU
+#if defined PHOTON_SR_ACTIVE || (defined TAA && defined TAAU)
     clip_pos.xy = clip_pos.xy * taau_render_scale
         + clip_pos.w * (taau_render_scale - 1.0);
     clip_pos.xy += taa_offset * clip_pos.w;

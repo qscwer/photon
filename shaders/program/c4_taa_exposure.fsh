@@ -269,9 +269,13 @@ void draw_histogram(ivec2 texel) {
 #endif
 
 void main() {
+#ifdef PHOTON_SR_ACTIVE
+    ivec2 texel = ivec2(gl_FragCoord.xy);
+#else
     ivec2 texel = ivec2(gl_FragCoord.xy * taau_render_scale);
+#endif
 
-#ifdef TAA
+#if defined TAA && !defined PHOTON_SR_ACTIVE
 #ifndef LOD_MOD_ACTIVE
     vec3 closest = get_closest_fragment(depthtex0, texel);
 
@@ -376,7 +380,7 @@ void main() {
     current_color = reinhard_inverse(current_color);
 
     result = vec4(current_color, pixel_age * offcenter_rejection);
-#else // TAA disabled
+#else
     result = texelFetch(colortex0, texel, 0);
 #endif
 

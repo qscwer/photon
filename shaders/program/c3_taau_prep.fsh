@@ -4,12 +4,71 @@
   Photon Shader by SixthSurge
 
   program/c3_taau_prep:
-  Calculate neighborhood limits for TAAU
+  Prepare motion vectors for Super Resolution or neighborhood limits for TAAU
 
 --------------------------------------------------------------------------------
 */
 
 #include "/include/global.glsl"
+
+#ifdef PHOTON_SR_ACTIVE
+
+layout(location = 0) out vec2 motion_vectors;
+
+/* RENDERTARGETS: 13 */
+
+in vec2 uv;
+
+uniform sampler2D depthtex0;
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferProjection;
+uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferPreviousModelView;
+uniform mat4 gbufferPreviousProjection;
+uniform vec3 cameraPosition;
+uniform vec3 previousCameraPosition;
+uniform float near;
+uniform float far;
+uniform vec2 view_res;
+uniform vec2 taa_offset;
+
+#define TEMPORAL_REPROJECTION
+#include "/include/utility/space_conversion.glsl"
+
+void main() {
+    ivec2 texel = ivec2(gl_FragCoord.xy);
+    float depth = texelFetch(depthtex0, texel, 0).x;
+    bool is_lod = false;
+
+#ifdef LOD_MOD_ACTIVE
+    float lod_depth = texelFetch(lod_depth_tex, texel, 0).x;
+    is_lod = is_lod_terrain(depth, lod_depth);
+    if (is_lod) {
+        depth = lod_depth;
+    }
+#endif
+
+    if (!is_lod && depth < hand_depth) {
+        motion_vectors = vec2(0.0);
+        return;
+    }
+
+    vec2 current_uv = uv - 0.5 * taa_offset / taau_render_scale;
+    vec3 screen_pos = vec3(current_uv, min(depth, 1.0 - eps));
+    vec3 scene_pos = view_to_scene_space(
+        screen_to_view_space(screen_pos, false, is_lod)
+    );
+
+    // Sky pixels follow camera rotation without translation.
+    vec2 previous_uv = reproject_scene_space(scene_pos, depth >= 1.0, is_lod).xy;
+    vec2 velocity = previous_uv - current_uv;
+    motion_vectors = any(isnan(velocity)) || any(isinf(velocity))
+        ? vec2(0.0)
+        : clamp(velocity, vec2(-1.0), vec2(1.0));
+}
+
+#else
 
 layout(location = 0) out vec3 min_color;
 layout(location = 1) out vec3 max_color;

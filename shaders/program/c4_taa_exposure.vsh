@@ -32,6 +32,12 @@ uniform vec2 taa_offset;
 
 #include "/include/utility/color.glsl"
 
+#ifdef PHOTON_SR_ACTIVE
+const float exposure_input_scale = 1.0;
+#else
+const float exposure_input_scale = taau_render_scale;
+#endif
+
 #define get_exposure_from_ev_100(ev100) exp2(-(ev100))
 #define get_exposure_from_luminance(l) calibration / (l)
 #define get_luminance_from_exposure(e) calibration / (e)
@@ -97,7 +103,7 @@ void build_histogram(out float[HISTOGRAM_BINS] pdf) {
             vec2 coord = vec2(x, y) * tile_size + (0.5 * tile_size);
 
             vec3 rgb
-                = textureLod(colortex0, coord * taau_render_scale, lod).rgb;
+                = textureLod(colortex0, coord * exposure_input_scale, lod).rgb;
             float luminance = dot(rgb, luminance_weights_ap1);
 
             float bin = get_bin_from_luminance(luminance);
@@ -146,7 +152,7 @@ void main() {
 #if AUTO_EXPOSURE == AUTO_EXPOSURE_SIMPLE
     float lod = ceil(log2(max_of(view_res)));
     vec3 rgb
-        = textureLod(colortex0, vec2(0.5 * taau_render_scale), int(lod)).rgb;
+        = textureLod(colortex0, vec2(0.5 * exposure_input_scale), int(lod)).rgb;
     float luminance
         = clamp(dot(rgb, luminance_weights), min_luminance, max_luminance);
 #elif AUTO_EXPOSURE == AUTO_EXPOSURE_HISTOGRAM

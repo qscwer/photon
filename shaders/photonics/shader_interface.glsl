@@ -67,9 +67,9 @@ void load_fragment_variables(out vec3 albedo, out vec3 world_pos, out vec3 world
 }
 
 vec2 get_taa_jitter() {
-#ifdef TAA
+#if defined PHOTON_SR_ACTIVE || defined TAA
 
-#ifdef TAAU
+#if defined PHOTON_SR_ACTIVE || defined TAAU
     return taa_offset * rcp(taau_render_scale);
 #else
     return taa_offset * 0.66;

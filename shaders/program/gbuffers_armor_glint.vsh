@@ -49,7 +49,7 @@ void main() {
     vec3 view_pos = scene_to_view_space(pos);
     vec4 clip_pos = project(gl_ProjectionMatrix, view_pos);
 
-#if defined TAA && defined TAAU
+#if defined PHOTON_SR_ACTIVE || (defined TAA && defined TAAU)
     clip_pos.xy = clip_pos.xy * taau_render_scale
         + clip_pos.w * (taau_render_scale - 1.0);
     clip_pos.xy += taa_offset * clip_pos.w;

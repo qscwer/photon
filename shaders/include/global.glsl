@@ -83,7 +83,10 @@ const float golden_ratio = 0.5 + 0.5 * sqrt(5.0);
 const float golden_angle = tau / golden_ratio / golden_ratio;
 const float hand_depth = 0.56;
 
-#if defined TAA && defined TAAU
+#if defined SR_ENABLE && SR_ENABLE && SR_SHOULD_APPLY_SCALE
+#define PHOTON_SR_ACTIVE
+const float taau_render_scale = SR_RENDER_SCALE_FACTOR;
+#elif defined TAA && defined TAAU
 const float taau_render_scale = TAAU_RENDER_SCALE;
 #else
 const float taau_render_scale = 1.0;

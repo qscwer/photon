@@ -212,7 +212,7 @@ void main() {
     position_view = scene_to_view_space(position_scene);
     vec4 position_clip = project(gl_ProjectionMatrix, position_view);
 
-#if defined TAA && defined TAAU
+#if defined PHOTON_SR_ACTIVE || (defined TAA && defined TAAU)
     position_clip.xy = position_clip.xy * taau_render_scale
         + position_clip.w * (taau_render_scale - 1.0);
     position_clip.xy += taa_offset * position_clip.w;

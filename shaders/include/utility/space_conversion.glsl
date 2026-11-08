@@ -36,8 +36,8 @@ vec3 screen_to_view_space(
 ) {
     vec3 ndc_pos = 2.0 * screen_pos - 1.0;
 
-#ifdef TAA
-#ifdef TAAU
+#if defined PHOTON_SR_ACTIVE || defined TAA
+#if defined PHOTON_SR_ACTIVE || defined TAAU
     vec2 jitter_offset = taa_offset * rcp(taau_render_scale);
 #else
     vec2 jitter_offset = taa_offset * 0.66;
@@ -58,8 +58,8 @@ vec3 view_to_screen_space(
 ) {
     vec3 ndc_pos = project_and_divide(projection_matrix, view_pos);
 
-#ifdef TAA
-#ifdef TAAU
+#if defined PHOTON_SR_ACTIVE || defined TAA
+#if defined PHOTON_SR_ACTIVE || defined TAAU
     vec2 jitter_offset = taa_offset * rcp(taau_render_scale);
 #else
     vec2 jitter_offset = taa_offset * 0.66;
